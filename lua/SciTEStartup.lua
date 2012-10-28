@@ -27,6 +27,7 @@ end	-- LoadLuaFile()
 LoadLuaFile("Class.lua")	-- Always load first.
 LoadLuaFile("Common.lua")	-- Always load second.
 LoadLuaFile("AutoItPixmap.lua")
+LoadLuaFile("AutoItAutoComplete.lua")
 
 -- Start up the events (Calls OnStartup()).
 EventClass:BeginEvents()
