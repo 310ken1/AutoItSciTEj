@@ -59,7 +59,16 @@ function Common:MatchWordAtStart(word, line)
 	local word_found = editor:textrange(word_start, word_end)
 	return string.lower(word_found) == string.lower(word), word_start, word_end, word_found
 end	-- MatchWordAtStart()
-
+--
+function Common:FirstWord(line)
+	local word_pos = editor.LineIndentPosition[line] + 1
+	local word_start = editor:WordStartPosition(word_pos)
+	local word_end = editor:WordEndPosition(word_pos)
+	local word_found = editor:textrange(word_start, word_end)
+	word_found = word_found:gsub("^%s*", "")    -- remove leading white space
+	word_found = word_found:gsub("[\r\n]", "")    -- remove newlines
+	return string.lower(word_found)
+end	-- WordAtStart()
 --------------------------------------------------------------------------------
 -- GetWord()
 --

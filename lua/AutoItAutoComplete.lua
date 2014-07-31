@@ -14,6 +14,7 @@ function AutoItAutoComplete:OnStartup()
 	self.IDM_SHOWCALLTIP = 232
 	self.IDM_COMPLETE = 233
 	self.IDM_COMPLETEWORD = 234
+	self.Check_Calltip = false
 
 	-- List of "valid" styles as used by IsValidStyle().
 	self.style_table =
@@ -26,6 +27,27 @@ function AutoItAutoComplete:OnStartup()
 	}
 end	-- OnStartup()
 
+--------------------------------------------------------------------------------
+-- OnUpdateUI()
+--
+-- Controls showing CallTips.
+--
+-- Parameters:
+--	
+--------------------------------------------------------------------------------
+function AutoItAutoComplete:OnUpdateUI()
+	-- Check for showing Calltip. this is activate by the OnKey check of "," or "(" but moved here because at this time the StyleAt is know for the typed character
+	if self:IsLexer(SCLEX_AU3) and self.Check_Calltip then
+		self.Check_Calltip = false
+		local style = editor.StyleAt[editor.CurrentPos-1]
+		-- check whether the "," or "(" 
+		if style ~= SCE_AU3_OPERATOR then return false end
+		if not editor:CallTipActive() then
+			scite.MenuCommand(self.IDM_SHOWCALLTIP)
+			return
+		end
+	end
+end
 --------------------------------------------------------------------------------
 -- OnChar(c)
 --
@@ -40,20 +62,12 @@ function AutoItAutoComplete:OnChar(c)
 		if props['autocomplete.au3.disable'] == "1" then
 			self:CancelAutoComplete()
 			return false
-		end
-		-- Store information about the character 2 back from the current position.
-		local style = editor.StyleAt[editor.CurrentPos-2]
-		local tCharVal = editor.CharAt[editor:WordStartPosition(editor.CurrentPos)]
-		if tCharVal < 0 then 
-			tCharVal = 256 + tCharVal 
-		end 
-		local c2 = string.char(tCharVal)
+		end		
 
 		-- Show CallTip when a comma is typed to delimit function parameters.
-		if ((c == "," or c == "(") and
-			(self:IsValidStyle(style) or self:IsQuoteChar(c2)) and
-			not editor:CallTipActive()) then
-			scite.MenuCommand(self.IDM_SHOWCALLTIP)
+		if ((c == "," or c == "(")) then
+			-- set variable to 1 and let AutoItAutoComplete:OnUpdateUI handle the rest as only then the StyleAt is proper set
+			self.Check_Calltip = true
 			return
 		end
 
